@@ -1,0 +1,245 @@
+---
+title: "Words, Words, Words"
+subtitle: "AKA How To Talk Like A Philosopher"
+output: html_notebook
+---
+
+```{r, warning=FALSE, message=FALSE,echo=FALSE}
+knitr::opts_chunk$set(eval = TRUE, echo = FALSE, warning=FALSE, tidy = TRUE, fig.align = 'center')
+```
+
+#### This is a guidebook aiming to get an idea which words are the most philisophical, or at the very least to explore which words are most used in philosophy. 
+
+#### The data used in this report can be found at https://www.kaggle.com/kouroshalizadeh/history-of-philosophy
+
+```{r, message=FALSE, warning=FALSE,echo=FALSE}
+packages.used=c("tidyverse", "gridExtra", "grid", "tm", "wordcloud2", "RColorBrewer", "wordcloud" )
+# check packages that need to be installed.
+packages.needed=setdiff(packages.used, 
+                        intersect(installed.packages()[,1], 
+                                  packages.used))
+# install additional packages
+if(length(packages.needed)>0){
+  install.packages(packages.needed, dependencies = TRUE)
+}
+# load packages
+library(tidyverse)
+library(gridExtra)
+library(grid)
+library(tm)
+library(wordcloud2)
+library(RColorBrewer)
+library(wordcloud)
+```
+
+This report is prepared with the following environmental settings.
+
+```{r}
+print(R.version)
+```
+
+```{r, echo = FALSE}
+word.df <- read.csv("../data/philosophy_data.csv")
+```
+```{r, echo = FALSE}
+#data cleaning
+df <- word.df %>%
+  select(title, author, school, original_publication_date, corpus_edition_date, tokenized_txt)
+rm(word.df)
+
+df$tokenized_txt <- gsub("\\[|\\]","",as.character(df$tokenized_txt))
+df$tokenized_txt <- gsub("\'","",as.character(df$tokenized_txt))
+
+df <- df %>% 
+    mutate(tokenized_txt=strsplit(tokenized_txt, ",")) %>% 
+    unnest(tokenized_txt) %>%
+    rename("word" = "tokenized_txt")
+df_author <- df %>%
+  select(author, word) %>%
+  group_by(author, word) %>%
+  summarise(n = n())
+
+df_total <- df %>%
+  select(word) %>%
+  group_by(word) %>%
+  summarise(n = n())
+df_total <- df_total %>%
+  arrange(desc(n))
+rm(df)
+top_15_words <- df_total$word[1:15]
+```
+# Which words were used most by philsophers?
+
+This is a question that can be looked at two ways:
+Which words are used most throughout all of these philosophical works?
+Which words did each philosopher use most?
+
+## What words are most used overall?
+
+In this case, I've chosen to show the frequencies of the top 15 most used words in these philosophical works in a wordmap and barplot below.
+
+```{r}
+wordcloud2(data=df_total, size=1.6, color='random-dark')
+```
+```{r}
+ggplot(df_total[1:15,] %>% mutate(word = reorder(word, n)) , aes(x=word, y=n)) +
+  geom_col() +
+  ylab("Frequency")+
+  ggtitle("Top 15 most Used Words") +
+      coord_flip()
+```
+As you can see "the" is the most used word by a very large margin. We can see that the words used most by these philosophers are small words that have no large meaning by themselves. It may be impossible to string all 15 of these words together in a sentence, they are vague and lack any real substance to grab on to. The closest I could get was "Be as it is, which are not this or for that." This may either mean that philosophers are very vague or they switch topics so rapidly that no one subject name is brought up too much. Either way, this leads me to believe that the language used in philosophy may be hard to decipher. 
+
+
+## But are the authors using different words?
+
+We have data on 36 different authors, but lets start by grabbing a few of them to see if they match and go from there. If the first few don't have an identical distribution of word use then it's fair to say that the whole group isn't likely to have identical word choice either. Lets focus on the 6 that we have the most data from.
+```{r}
+total_author <- df_author %>%
+  group_by(author) %>%
+  summarise(Total_Words = sum(n)) %>%
+  arrange(desc(Total_Words))
+tibble(total_author[1:6,])
+```
+```{r, fig.width=8, fig.height= 6}
+Aristotle <- df_author %>% filter(author == "Aristotle") %>% arrange(desc(n))
+Plato <- df_author %>% filter(author == "Plato") %>% arrange(desc(n))
+Hegel <- df_author %>% filter(author == "Hegel") %>% arrange(desc(n))
+Foucault <- df_author %>% filter(author == "Foucault") %>% arrange(desc(n))
+Kant <- df_author %>% filter(author == "Kant") %>% arrange(desc(n))
+Malebranche <- df_author %>% filter(author == "Malebranche") %>% arrange(desc(n))
+
+
+getPalette = colorRampPalette(brewer.pal(9, "Set1"))
+
+myColors <- getPalette(25)
+names(myColors) <- unique(c(Aristotle$word[1:15], Plato$word[1:15], Hegel$word[1:15], Foucault$word[1:15], Kant$word[1:15], Malebranche$word[1:15]))
+custom_colors <- scale_fill_manual(name = "word", values = myColors)
+
+grid.arrange(
+ggplot(Aristotle[1:15,] %>% mutate(word = reorder(word, n)) , aes(x=word, y=n, fill = word)) +
+  geom_col() + 
+  custom_colors +
+  ylab("Frequency")+
+  ggtitle("Aristotle") +
+      coord_flip() + 
+  theme(legend.position = "none") ,
+ggplot(Plato[1:15,] %>% mutate(word = reorder(word, n)) , aes(x=word, y=n, fill = word)) +
+  geom_col() +
+  ylab("Frequency")+
+  ggtitle("Plato") +
+      coord_flip() +
+  custom_colors + 
+  theme(legend.position = "none"),
+ggplot(Hegel[1:15,] %>% mutate(word = reorder(word, n)) , aes(x=word, y=n, fill = word)) +
+  geom_col() +
+  ylab("Frequency")+
+  ggtitle("Hegel") +
+      coord_flip() +
+  custom_colors + 
+  theme(legend.position = "none"),
+ggplot(Foucault[1:15,] %>% mutate(word = reorder(word, n)) , aes(x=word, y=n, fill = word)) +
+  geom_col() +
+  ylab("Frequency")+
+  ggtitle("Foucault") +
+      coord_flip() +
+  custom_colors + 
+  theme(legend.position = "none"),
+ggplot(Kant[1:15,] %>% mutate(word = reorder(word, n)) , aes(x=word, y=n, fill = word)) +
+  geom_col() +
+  ylab("Frequency")+
+  ggtitle("Kant") +
+      coord_flip() +
+  custom_colors + 
+  theme(legend.position = "none"),
+ggplot(Malebranche[1:15,] %>% mutate(word = reorder(word, n)) , aes(x=word, y=n, fill = word)) +
+  geom_col() +
+  ylab("Frequency")+
+  ggtitle("Malebranche") +
+      coord_flip() +
+  custom_colors + 
+  theme(legend.position = "none"), ncol = 3,top = textGrob("Top 15 Most used Words",gp=gpar(fontsize=20,font=3))
+
+)
+```
+
+While most of them are quite similar in the distribution of word usage, the order of a lot of these words vary wildly. Everyone uses "the" more often than any other word by a large margin. The words "the", of", and "and" are in the top 5 most used words for all 6 of the philosophers but the rest of the words have largely unpredictable frequencies comparatively. We have finally introduced a word that you can use as the subject of a sentence though, that word being "you." This makes it a lot easier to string together sentences.
+
+```{r, fig.width = 7, fig.height=5}
+par(mfrow = c(2,3), mar = rep(0, 4))
+wordcloud(Aristotle$word, Aristotle$n, max.words = 100, colors = colors())
+wordcloud(Plato$word, Plato$n, max.words = 100, colors = colors())
+wordcloud(Hegel$word, Hegel$n, max.words = 100, colors = colors())
+wordcloud(Foucault$word, Foucault$n, max.words = 100, colors = colors())
+wordcloud(Kant$word, Kant$n, max.words = 100, colors = colors())
+wordcloud(Malebranche$word, Malebranche$n, max.words = 100, colors = colors())
+```
+
+
+# Are shorter words more philisophical?
+
+```{r}
+df_total <- df_total %>%
+  mutate(word_length = nchar(word))
+```
+
+```{r}
+total_letters <- df_total$n * df_total$word_length
+avg_letters <- sum(total_letters)/ sum(df_total$n)
+```
+
+Since the words we saw were used most often were quite short, does that mean if I use smaller words will I sound philosophical?
+
+Well, the average number of character used per word in total for all the philosophical words is 5.67. Since you can't use half a letter in a word, we'll say that the average word is about 6 letters long. You may be thinking something along the lines of "But all of the most-used words were really small, how can this be?" and you'd have a very valid point. To explain why this is, lets look at the overall distribution of how many characters were in each word. 
+
+```{r}
+ggplot(df_total, aes(word_length, weights = n)) +
+  geom_density(adjust = 2, fill = "darkblue") +
+  ylab("Frequency") +
+  ggtitle("Word Length and Frequency for Each Word")
+```
+This isn't looking too good, there are a couple of words here with 50+ letters, that's impossible! The longest word I could find in the dictionary "pneumonoultramicroscopicsilicovolcanoconiosis" only has 45 letters, so how do we have entrys that are so long?
+
+You see, the long entries here are multiple words that were published without spaces between them and wierd long strings of letters that were included in addition to the readable literature. Take a look at the ten longest entries below:
+```{r}
+long_words <- df_total %>%
+  select(word, word_length) %>%
+  arrange(desc(word_length))
+tibble(long_words[1:10,])
+rm(long_words)
+```
+
+Initially, I believed these to be errors in parsing but if you look at the sentences they come from in the dataset they appear in the same way. They do however appear most often in the works of a few philosophers, so lets look at the distribution of word length for all the different authors.
+
+```{r}
+df_author <- df_author %>%
+  mutate(word_length = nchar(word))
+```
+```{r, fig.width=7, fig.height=6}
+ggplot(df_author, aes(x = word_length, y = n )) +
+  geom_point() +
+  facet_wrap(vars(author))
+```
+
+
+The longest of these run-ons and indecipherable strings come from works written by "Hegel", "Derrida", and "Deleuze", but upon further investigation I found them in works by most of the authors we have information on. But suppose we decide to count these unusual strings as transcribing errors and not a unique form of self-expression used primarily by philosophers. Let's remove the outliers in word length! 
+
+Using the list of unique words as a dataset to calculate the appropriate word length, we find that the cutoff for outliers is 17 characters long as illustrated in the boxplot below.
+```{r}
+boxplot(df_total$word_length, horizontal = TRUE)
+```
+
+Removing all words longer than 17 characters long gives us the following distribution
+
+```{r}
+ggplot(df_total %>% filter(word_length<=17), aes(word_length, weights = n)) +
+  geom_density(adjust = 2, fill = "darkblue") +
+  ylab("Frequency") +
+  ggtitle("Word Length and Frequency for Each Word")
+```
+It looks like if you want to sound like a philosopher you should use mostly words that are 2-5 words long and sprinkle in a long word at least every ten words (or about 5% of your words should be long). 
+
+# Conclusion
+
+In summary, in order to sound like a philosopher you're going to need to very vague and non-specific. Use words like "the", "and", "so", and "for" whenever possible. You'll want to speak mostly in small words but every 10 or so words through in a long word. Occasionally you'll need to speak in tongues, or shove as many words together as quickly as you can without pausing or taking a breath. I can only assume this is to keep the attention of your audience, but there could be any number of reasons to compel someone to do this. 
+
