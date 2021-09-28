@@ -4,6 +4,8 @@
 
 <img src="figs/philosophy_image.png" width="500">
 
+[Image Source](https://www.pinclipart.com/pindetail/mTxwRo_philosopher-clipart-transparent-png-download/)
+
 ### [Project Description](doc/)
 This is the first and only *individual* (as opposed to *team*) project this semester. 
 
