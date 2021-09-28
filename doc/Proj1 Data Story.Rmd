@@ -175,6 +175,7 @@ wordcloud(Kant$word, Kant$n, max.words = 100, colors = colors())
 wordcloud(Malebranche$word, Malebranche$n, max.words = 100, colors = colors())
 ```
 
+These wordclouds of the 6 chosen philosophers confirm what we learned from the barplot. Word choice seems unique to the philosopher but all of them have a tendency to favor short words that tie together larger concepts.
 
 # Are shorter words more philisophical?
 
@@ -198,9 +199,9 @@ ggplot(df_total, aes(word_length, weights = n)) +
   ylab("Frequency") +
   ggtitle("Word Length and Frequency for Each Word")
 ```
-This isn't looking too good, there are a couple of words here with 50+ letters, that's impossible! The longest word I could find in the dictionary "pneumonoultramicroscopicsilicovolcanoconiosis" only has 45 letters, so how do we have entrys that are so long?
+This isn't looking too good, there are a couple of words here with 50+ letters, that's impossible! The longest word I could find in the dictionary "pneumonoultramicroscopicsilicovolcanoconiosis" only has 45 letters, so how do we have entries that are so long?
 
-You see, the long entries here are multiple words that were published without spaces between them and wierd long strings of letters that were included in addition to the readable literature. Take a look at the ten longest entries below:
+You see, the long entries here are multiple words that were published without spaces between them and weird long strings of letters that were included in addition to the readable literature. Take a look at the ten longest entries below:
 ```{r}
 long_words <- df_total %>%
   select(word, word_length) %>%

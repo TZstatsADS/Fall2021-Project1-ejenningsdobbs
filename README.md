@@ -2,17 +2,17 @@
 ## Fall 2021
 ## Project 1: A "data story" on the history of philosophy
 
-<img src="figs/100126-the-glass.jpeg" width="500">
+<img src="figs/philosophy_image.png" width="500">
 
 ### [Project Description](doc/)
 This is the first and only *individual* (as opposed to *team*) project this semester. 
 
 Term: Fall 2021
 
-+ Projec title: Lorem ipsum dolor sit amet
-+ This project is conducted by [your name]
++ Project title: Words, Words, Words
++ This project is conducted by Emily Jennings-Dobbs
 
-+ Project summary: [a short summary] Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
++ Project summary: The way philosophers talk and write has confused countless people for generations, myself included. Well, if you can't beat them, join them. Have you ever wanted to confuse people the way Aristotle and Plato have for generations? Well now you can! With this analysis we'll try to dissect the essence of word choice in philosophical text and really determine how to speak like a Philosophical writer. 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
